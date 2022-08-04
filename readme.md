@@ -36,4 +36,3 @@ mapa: 9 harti
         puzzle uri
         npc-uri
     forma hartii+schita
-ceva
