@@ -1,4 +1,4 @@
- using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 public class movement : MonoBehaviour
@@ -29,12 +29,28 @@ public class movement : MonoBehaviour
     public float walljumptime;
     public float xWallforce;
     public float yWallforce;
+    
+
+    [Header("Dash")]
+    private float h;
+    private bool isDashing = false;
+    private bool canDash = true;
+    private float dashingPower = 12f;
+    private float dashingTime = 0.2f;
+    private float dashingCooldown = 1f;
+    private bool isFacingRight = true;
+
+
     private void Start()
     {
         rb = GetComponent<Rigidbody2D>();
     }
     void Update()
     {
+        if(isDashing) //cat timp caracterul e in dash nu poate face nimic altceva
+        {
+            return;
+        }
         if (!isGrounded && !wallsliding)
             rb.gravityScale += gravityIncreasePerSecond * Time.deltaTime;
         else rb.gravityScale = 1;
@@ -90,15 +106,22 @@ public class movement : MonoBehaviour
         isGrounded = Physics2D.OverlapCircle(groundcheck.position, checkradius, groundlayer);
         istouchingfront = Physics2D.OverlapCircle(frontcheck.position, checkradius, groundlayer);
 
-    
+         if (Input.GetKeyDown(KeyCode.LeftShift) && canDash) //cand se apasa shift si caracterul nu este in dash
+        {
+            StartCoroutine(dash());
+        }
+        Flip();
 
     }
 
 
     void FixedUpdate()
     {
-  
-        float h = Input.GetAxisRaw("Horizontal");
+        if(isDashing) //cat timp caracterul e in dash nu poate face nimic altceva
+        {
+            return;
+        }
+        h = Input.GetAxisRaw("Horizontal");
         if (h < 0)
         {
           isfacingright=-1;
@@ -143,5 +166,29 @@ public class movement : MonoBehaviour
         walljumping = false;
     }
 
+    private IEnumerator dash() //cod pt dash
+    {
+        canDash = false;
+        isDashing = true;
+        float originalGravity = rb.gravityScale;
+        rb.gravityScale = 0f;
+        rb.velocity = new Vector2(transform.localScale.x * dashingPower, 0f);
+        yield return new WaitForSeconds(dashingTime);
+        rb.gravityScale = originalGravity;
+        isDashing = false;
+        yield return new WaitForSeconds(dashingCooldown);
+        canDash = true;
+    }
+
+    private void Flip() //intoarce caracterul in functie de directia in care mergi
+    {
+        if(isFacingRight && h < 0f || !isFacingRight && h > 0f) 
+        {
+            isFacingRight = !isFacingRight;
+            Vector3 localScale = transform.localScale;
+            localScale.x *= -1f;
+            transform.localScale = localScale;
+        }
+    }
 
 }
