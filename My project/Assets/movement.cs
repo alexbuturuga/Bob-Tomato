@@ -19,6 +19,8 @@ public class movement : MonoBehaviour
     public float gravityIncreasePerSecond = 0.8f;
 
     [Header("Wall Slide")]
+    public bool space;
+    public int isfacingright;
     public bool istouchingfront;
     public bool wallsliding;
     public float wallslidingspeed;
@@ -38,14 +40,16 @@ public class movement : MonoBehaviour
         else rb.gravityScale = 1;
         if (!isjumping)
         { jumptime = -1; }
-        if ((isGrounded || wallsliding) && Input.GetButtonDown("Jump")) //cand se apasa space
+        if (isGrounded && Input.GetButtonDown("Jump")) //cand se apasa space
         {
+            
             isjumping = true;
             jumptime = jumpstarttime;
             rb.velocity = Vector2.up * jumpforce;
         }
         if (Input.GetButton("Jump") && isjumping == true) //cat timp e space apasat
         {
+            
             if (jumptime > 0)
             {
                 rb.velocity = Vector2.up * jumpforce;
@@ -61,59 +65,79 @@ public class movement : MonoBehaviour
         if (Input.GetKeyUp(KeyCode.Space)) //cand nu se mai apasa space
         {
             isjumping = false;
+            
         }
 
 
+
+        if (isGrounded)
+        { wallsliding = false; }
+
+
+
+        if (Input.GetButtonDown("Jump"))
+            space = true;
+        else space = false;
+
+
+        if (space && wallsliding)
+        {
+            walljumping = true;
+            Invoke("SetWallJumpingToFalse", walljumptime);
+        }
+
+
+        isGrounded = Physics2D.OverlapCircle(groundcheck.position, checkradius, groundlayer);
+        istouchingfront = Physics2D.OverlapCircle(frontcheck.position, checkradius, groundlayer);
+
+    
 
     }
 
 
     void FixedUpdate()
     {
-        bool isfacingright;
+  
         float h = Input.GetAxisRaw("Horizontal");
         if (h < 0)
         {
-            isfacingright = false;
+          isfacingright=-1;
             transform.localScale = new Vector2(-1, transform.localScale.y);
         }
-        else
+        else if(h>0)
         {
-            isfacingright = true;
+         isfacingright =1;
             transform.localScale = new Vector2(1, transform.localScale.y);
         }
         rb.velocity = new Vector2(h * Speed, rb.velocity.y); //miscare stanga-dreapta
-
-        isGrounded = Physics2D.OverlapCircle(groundcheck.position, checkradius, groundlayer);
 
         //wall slide
 
 
 
-        istouchingfront = Physics2D.OverlapCircle(frontcheck.position, checkradius, groundlayer);
 
 
-        if (istouchingfront && !isGrounded)
+            if (istouchingfront && !isGrounded)
         { wallsliding = true; }
         else { wallsliding = false; }
-
+        if (istouchingfront && h == 0)
+            wallsliding = true;
         if (wallsliding)
-        { rb.velocity = new Vector2(rb.velocity.x, -Mathf.Clamp(rb.velocity.y, wallslidingspeed, float.MaxValue)); }
+        { rb.velocity = new Vector2(Mathf.Clamp(rb.velocity.x, h, float.MaxValue), -Mathf.Clamp(rb.velocity.y, wallslidingspeed, float.MaxValue)); }
 
-        if (Input.GetButton("Jump") && wallsliding  )
-        {
-            walljumping = true;
-            Invoke("SetWallJumpingToFalse", walljumptime);
-        }
+
 
         if (walljumping)
-        { 
-            rb.velocity = new Vector2(xWallforce * -h, yWallforce); }
-      
+        {
+            rb.velocity = new Vector2(xWallforce * -isfacingright, yWallforce);
+
+        }
+
 
 
 
     }
+
     void SetWallJumpingToFalse()
     {
         walljumping = false;
