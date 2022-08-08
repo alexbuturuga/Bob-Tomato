@@ -30,17 +30,6 @@ public class movement : MonoBehaviour
     public float xWallforce;
     public float yWallforce;
     
-
-    [Header("Dash")]
-    private float h;
-    private bool isDashing = false;
-    private bool canDash = true;
-    private float dashingPower = 12f;
-    private float dashingTime = 0.2f;
-    private float dashingCooldown = 1f;
-    private bool isFacingRight = true;
-
-
     private void Start()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -110,7 +99,6 @@ public class movement : MonoBehaviour
         {
             StartCoroutine(dash());
         }
-        Flip();
 
     }
 
@@ -166,7 +154,15 @@ public class movement : MonoBehaviour
         walljumping = false;
     }
 
+    [Header("Dash")]
+    private float h;
+    private bool isDashing = false;
+    private bool canDash = true;
+    public float dashingPower = 12f;
+    public float dashingTime = 0.2f;
+    public float dashingCooldown = 1f;
     private IEnumerator dash() //cod pt dash
+
     {
         canDash = false;
         isDashing = true;
@@ -179,16 +175,4 @@ public class movement : MonoBehaviour
         yield return new WaitForSeconds(dashingCooldown);
         canDash = true;
     }
-
-    private void Flip() //intoarce caracterul in functie de directia in care mergi
-    {
-        if(isFacingRight && h < 0f || !isFacingRight && h > 0f) 
-        {
-            isFacingRight = !isFacingRight;
-            Vector3 localScale = transform.localScale;
-            localScale.x *= -1f;
-            transform.localScale = localScale;
-        }
-    }
-
 }
