@@ -20,7 +20,7 @@ public class movement : MonoBehaviour
 
     [Header("Wall Slide")]
     public bool space;
-    public int isfacingright;
+    public static int isfacingright;
     public bool istouchingfront;
     public bool wallsliding;
     public float wallslidingspeed;
